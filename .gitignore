@@ -1,2 +1,10 @@
 build
 debian/*.log
+debian/*.install
+debian/*.substvars
+debian/files
+debian/debhelper-build-stamp
+debian/tmp
+debian/nfcd
+debian/nfcd-tools
+debian/libnfcd-dev
