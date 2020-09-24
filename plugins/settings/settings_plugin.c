@@ -38,8 +38,10 @@
 
 #include <gio/gio.h>
 
+#ifndef NO_DBUSACCESS
 #include <dbusaccess_policy.h>
 #include <dbusaccess_peer.h>
+#endif
 
 #include <gutil_misc.h>
 
@@ -64,7 +66,9 @@ typedef struct settings_plugin {
     NfcPlugin parent;
     NfcManager* manager;
     OrgSailfishosNfcSettings* iface;
+#ifndef NO_DBUSACCESS
     DAPolicy* policy;
+#endif
     char* storage_dir;
     char* storage_file;
     guint own_name_id;
@@ -106,6 +110,7 @@ typedef enum nfc_settings_action {
     SETTINGS_ACTION_SET_ENABLED,
 } SETTINGS_ACTION;
 
+#ifndef NO_DBUSACCESS
 static const DA_ACTION settings_policy_actions[] = {
     { "GetAll", SETTINGS_ACTION_GET_ALL, 0 },
     { "GetInterfaceVersion", SETTINGS_ACTION_GET_INTERFACE_VERSION, 0 },
@@ -114,13 +119,22 @@ static const DA_ACTION settings_policy_actions[] = {
     { NULL }
 };
 
+static const char settings_default_policy[] =
+    DA_POLICY_VERSION ";group(privileged)=allow";
+#endif
+
+#ifndef NO_DBUSACCESS
 #define SETTINGS_DEFAULT_ACCESS_GET_ALL               DA_ACCESS_ALLOW
 #define SETTINGS_DEFAULT_ACCESS_GET_INTERFACE_VERSION DA_ACCESS_ALLOW
 #define SETTINGS_DEFAULT_ACCESS_GET_ENABLED           DA_ACCESS_ALLOW
 #define SETTINGS_DEFAULT_ACCESS_SET_ENABLED           DA_ACCESS_DENY
-
-static const char settings_default_policy[] =
-    DA_POLICY_VERSION ";group(privileged)=allow";
+#else
+#define SETTINGS_DEFAULT_ACCESS_GET_ALL               1
+#define SETTINGS_DEFAULT_ACCESS_GET_INTERFACE_VERSION 1
+#define SETTINGS_DEFAULT_ACCESS_GET_ENABLED           1
+#define SETTINGS_DEFAULT_ACCESS_SET_ENABLED           1
+#define DA_ACCESS                                     gboolean
+#endif
 
 static
 GKeyFile*
@@ -240,6 +254,7 @@ settings_plugin_access_allowed(
     SETTINGS_ACTION action,
     DA_ACCESS def)
 {
+#ifndef NO_DBUSACCESS
     const char* sender = g_dbus_method_invocation_get_sender(call);
     DAPeer* peer = da_peer_get(SETTINGS_DA_BUS, sender);
 
@@ -253,6 +268,9 @@ settings_plugin_access_allowed(
     g_dbus_method_invocation_return_error_literal(call, SETTINGS_DBUS_ERROR,
         SETTINGS_ERROR_ACCESS_DENIED, "D-Bus access denied");
     return FALSE;
+#else
+    return TRUE;
+#endif
 }
 
 static
@@ -456,8 +474,10 @@ settings_plugin_init(
     self->storage_dir = g_strdup(SETTINGS_STORAGE_DIR);
     self->storage_file = g_build_filename(self->storage_dir,
         SETTINGS_STORAGE_FILE, NULL);
+#ifndef NO_DBUSACCESS
     self->policy = da_policy_new_full(settings_default_policy,
         settings_policy_actions);
+#endif
 }
 
 static
@@ -467,7 +487,9 @@ settings_plugin_finalize(
 {
     SettingsPlugin* self = SETTINGS_PLUGIN(plugin);
 
+#ifndef NO_DBUSACCESS
     da_policy_unref(self->policy);
+#endif
     g_free(self->storage_dir);
     g_free(self->storage_file);
     G_OBJECT_CLASS(settings_plugin_parent_class)->finalize(plugin);

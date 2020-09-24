@@ -6,7 +6,10 @@
 # Required packages
 #
 
-PKGS = libdbusaccess libglibutil glib-2.0 gobject-2.0 gio-2.0 gio-unix-2.0
+PKGS = libglibutil glib-2.0 gobject-2.0 gio-2.0 gio-unix-2.0
+ifneq ($(NO_DBUSACCESS),1)
+PKGS += libdbusaccess
+endif
 
 #
 # Default target
@@ -150,6 +153,10 @@ $(COVERAGE_DBUS_NEARD_BUILD_DIR):
 #
 # Setting plugin
 #
+
+ifeq ($(NO_DBUSACCESS),1)
+DEFINES += -DNO_DBUSACCESS
+endif
 
 SETTINGS_DIR = settings
 SETTINGS_PLUGIN_SRC = \
