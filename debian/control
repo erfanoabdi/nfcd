@@ -20,5 +20,5 @@ Description: NFC tools
 Package: libnfcd-dev
 Section: libdevel
 Architecture: any
-Depends: libnciplugin (= ${binary:Version}), libglibutil-dev, libncicore-dev, ${misc:Depends}
+Depends: libglibutil-dev, libncicore-dev, ${misc:Depends}
 Description: Development files for nfcd
