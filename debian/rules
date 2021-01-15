@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+LIBDIR=usr/lib/$(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+override_dh_auto_build:
+	dh_auto_build -- LIBDIR=$(LIBDIR) NO_DBUSACCESS=1 release pkgconfig debian/nfcd.install debian/libnfcd-dev.install debian/nfcd-tools.install
+
+override_dh_auto_clean:
+	dh_auto_clean -- LIBDIR=$(LIBDIR) NO_DBUSACCESS=1
+
+override_dh_auto_test:
+	dh_auto_test -- LIBDIR=$(LIBDIR) NO_DBUSACCESS=1
+
+override_dh_auto_install:
+	dh_auto_install -- LIBDIR=$(LIBDIR) NO_DBUSACCESS=1
+
+%:
+	dh $@

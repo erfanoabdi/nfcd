@@ -1,0 +1,2 @@
+debian/tmp/@LIBDIR@/pkgconfig/nfcd-plugin.pc @LIBDIR@/pkgconfig
+debian/tmp/usr/include/* usr/include
